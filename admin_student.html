@@ -1,0 +1,67 @@
+﻿{% extends "base.html" %}{% block title %}{{s.name}} · Principal{% endblock %}{% block body %}
+<p><a href="/admin/class/{{s.class_id}}">&#8592; Back to {{s.standard}} {{s.section}}</a></p>
+<h1>{{s.name}}</h1><p class="sub">{{s.standard}} {{s.section}} &middot; Roll {{s.roll_no}} &middot; ID {{s.code}} &middot; Teacher {{s.teacher_name}}</p>
+<form class="box" method="post" action="/admin/student/{{s.id}}/edit"><h2>Student details &middot; principal edit</h2>
+<div class="table-wrap"><table class="record-table"><tbody>
+<tr><th><label for="student-name">Name</label></th><td><input id="student-name" name="name" value="{{s.name}}" required></td></tr>
+<tr><th><label for="student-roll">Roll number</label></th><td><input id="student-roll" name="roll_no" type="number" min="1" value="{{s.roll_no}}" required></td></tr>
+<tr><th><label for="student-age">Age</label></th><td><input id="student-age" name="age" type="number" min="0" value="{{s.age or ''}}"></td></tr>
+<tr><th><label for="student-dob">Date of birth</label></th><td><input id="student-dob" name="date_of_birth" type="date" value="{{s.date_of_birth or ''}}"></td></tr>
+<tr><th><label for="student-blood">Blood group</label></th><td><select id="student-blood" name="blood_group"><option value="">Select</option>{% for b in ["A+","A-","B+","B-","AB+","AB-","O+","O-"] %}<option value="{{b}}" {% if s.blood_group==b %}selected{% endif %}>{{b}}</option>{% endfor %}</select></td></tr>
+<tr><th><label for="student-gender">Gender</label></th><td><input id="student-gender" name="gender" value="{{s.gender or ''}}"></td></tr>
+<tr><th><label for="parent-name">Parent name</label></th><td><input id="parent-name" name="parent_name" value="{{s.parent_name or ''}}"></td></tr>
+<tr><th><label for="parent-phone">Parent contact</label></th><td><input id="parent-phone" name="parent_phone" value="{{s.parent_phone}}" required></td></tr>
+<tr><th><label for="student-address">Address</label></th><td><textarea id="student-address" name="address" rows="2">{{s.address or ''}}</textarea></td></tr>
+</tbody></table></div><button>Save student details</button></form>
+<div class="box"><h2>Exam records</h2>
+{% for e in exams %}{% set subjects = exam_subjects.get(e, []) %}{% if subjects %}
+<form method="post" action="/admin/student/{{s.id}}/marks">
+<input type="hidden" name="exam" value="{{e}}">
+<h3>{{e}}{% for r in ranks %}{% if r.exam == e %} <span class="tag">Rank {{r.pos}}</span>{% endif %}{% endfor %}</h3>
+<div class="table-wrap"><table class="record-table">
+<thead><tr><th>Subject</th><th>Marks</th><th>Out of</th></tr></thead><tbody>
+{% for p in subjects %}
+{% set m = marks_by_subject.get((e, p.paper)) %}
+<tr>
+<td>{{p.paper}}</td>
+<td><input aria-label="{{p.paper}} marks" name="score_{{p.paper}}" type="number" min="0" step="0.5" value="{{m.score if m else ''}}" placeholder="Enter marks"></td>
+<td><input aria-label="{{p.paper}} max marks" name="max_score_{{p.paper}}" type="number" min="1" step="0.5" value="{{m.max_score if m else 100}}"></td>
+</tr>
+{% endfor %}
+</tbody></table></div>
+<button>Save {{e}} marks</button>
+</form><hr>
+{% endif %}{% else %}<p class="sub">No exams with subjects configured yet.</p>{% endfor %}
+<hr style="margin:18px 0">
+<details><summary style="cursor:pointer;color:var(--ink);font-weight:600">Edit / remove individual mark entries</summary>
+<div class="table-wrap"><table class="record-table"><thead><tr><th>Exam</th><th>Subject</th><th>Marks</th><th>Out of</th><th>Actions</th></tr></thead><tbody>
+{% for m in marks %}<tr>
+<td><input aria-label="Exam" form="mark-edit-{{m.id}}" name="exam" value="{{m.exam}}" required></td>
+<td><input aria-label="Subject" form="mark-edit-{{m.id}}" name="subject" value="{{m.subject}}" required></td>
+<td><input aria-label="Marks" form="mark-edit-{{m.id}}" name="score" type="number" min="0" step="0.5" value="{{m.score}}" required></td>
+<td><input aria-label="Out of" form="mark-edit-{{m.id}}" name="max_score" type="number" min="1" step="0.5" value="{{m.max_score}}" required></td>
+<td class="actions"><form id="mark-edit-{{m.id}}" method="post" action="/admin/mark/{{m.id}}/edit"></form>
+<button form="mark-edit-{{m.id}}">Update</button>
+<form method="post" action="/admin/mark/{{m.id}}/delete" style="display:inline"><button class="amber">Remove</button></form></td></tr>
+{% else %}<tr><td colspan="5">No exam marks yet.</td></tr>{% endfor %}
+</tbody></table></div></details>
+</div>
+<div>
+<form class="box" method="post" action="/admin/student/{{s.id}}/record"><h2>Attendance &middot; edit / add</h2>
+<input type="hidden" name="kind" value="attendance"><label>Month<input name="period" type="month" required></label>
+<label>Attendance %<input name="value" type="number" min="0" max="100" step="0.1" required></label><button>Save attendance</button>
+<p><b>Overall attendance:</b> {% if overall_attendance is not none %}{{overall_attendance|round(1)}}%{% else %}Not recorded yet{% endif %}</p>
+<div class="table-wrap"><table><thead><tr><th>Month</th><th>Attendance</th></tr></thead><tbody>
+{% for a in attendance %}<tr><td>{{a.month}}</td><td>{{a.percent|round(1)}}%</td></tr>{% else %}<tr><td colspan="2">No attendance recorded.</td></tr>{% endfor %}
+</tbody></table></div></form>
+<form class="box" method="post" action="/admin/student/{{s.id}}/record"><h2>Rank &middot; edit / add</h2>
+<input type="hidden" name="kind" value="rank"><label>Exam<select name="period" required>{% for e in exams %}<option>{{e}}</option>{% endfor %}</select></label>
+<label>Rank<input name="value" type="number" min="1" required></label><button>Save rank</button>
+<div class="table-wrap"><table><thead><tr><th>Exam</th><th>Rank</th></tr></thead><tbody>
+{% for r in ranks %}<tr><td>{{r.exam}}</td><td>{{r.pos}}</td></tr>{% else %}<tr><td colspan="2">No ranks recorded.</td></tr>{% endfor %}
+</tbody></table></div></form></div>
+<div class="box"><h2>Inbox and messages</h2><div class="table-wrap"><table><thead><tr><th>Type</th><th>Message</th><th>Sent</th></tr></thead><tbody>
+{% for m in messages %}<tr><td>{{m.kind}}</td><td>{{m.body}}</td><td>{{m.sent_at}}</td></tr>{% else %}<tr><td colspan="3">No messages yet.</td></tr>{% endfor %}
+</tbody></table></div></div>
+<div class="box"><h2>Remove student</h2><form method="post" action="/admin/student/{{s.id}}/delete" onsubmit="return confirm('Permanently remove this student and all related records?')"><button class="amber">Delete student</button></form></div>
+{% endblock %}

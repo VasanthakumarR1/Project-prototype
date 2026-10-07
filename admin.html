@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% block title %}Principal dashboard{% endblock %}{% block body %}
+<h1>Principal dashboard</h1><p class="sub">Manage classes, class teacher login accounts, subject teachers, students, and school-wide updates.</p>
+<div class="grid">
+<form class="box" method="post" action="/admin/class"><h2>Create class and class teacher login</h2>
+<label>Standard<input name="standard" placeholder="10" required></label><label>Section<input name="section" placeholder="A" required></label>
+<label>Academic year<input name="year" placeholder="2026-27" required></label>
+<label>Class teacher name<input name="name" required></label><label>Class teacher subject<input name="subject" placeholder="Mathematics"></label>
+<label>Class teacher username<input name="username" autocomplete="username" required></label>
+<label>Temporary password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+<button>Create class and class teacher login</button></form>
+<form class="box" method="post" action="/admin/announce"><h2>School announcement</h2>
+<p class="sub">Save this message for all parents and send SMS when configured.</p>
+<label>Message<textarea name="body" rows="4" required></textarea></label><button class="amber">Send to all parents</button></form>
+</div>
+<div class="box"><h2>Classes</h2><p class="sub">Open a class to manage its class teacher login, subject teachers, and student list.</p>
+<div class="table-wrap"><table><thead><tr><th>Class</th><th>Academic year</th><th>Teachers</th><th>Students</th><th>Manage</th></tr></thead><tbody>
+{% for c in classes %}<tr><td>{{c.standard}} {{c.section}}</td><td>{{c.year}}</td><td>{{c.teacher_count}}</td><td>{{c.student_count}}</td><td><a href="/admin/class/{{c.id}}">Open class</a></td></tr>
+{% else %}<tr><td colspan="5">No classes yet. Create a class and its class teacher login above.</td></tr>{% endfor %}
+</tbody></table></div></div>
+<div class="box"><h2>Student deletion approvals</h2><div class="table-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Requested by</th><th>Date</th><th>Actions</th></tr></thead><tbody>
+{% for r in deletion_requests %}<tr><td>{{r.student_name}} · Roll {{r.roll_no}}</td><td>{{r.standard}} {{r.section}}</td><td>{{r.teacher_name}}</td><td>{{r.created_at}}</td>
+<td class="actions"><form method="post" action="/admin/delete-request/{{r.id}}" style="display:inline-flex;gap:6px">
+<button name="action" value="approve">Approve</button><button class="amber" name="action" value="reject">Reject</button></form></td></tr>
+{% else %}<tr><td colspan="5">No pending removal requests.</td></tr>{% endfor %}
+</tbody></table></div></div>
+<div class="box"><h2>Parent reviews</h2><div class="table-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Review</th><th>Date</th></tr></thead><tbody>
+{% for r in reviews %}<tr><td>{{r.student_name}} · Roll {{r.roll_no}}</td><td>{{r.standard}} {{r.section}}</td><td>{{r.body}}</td><td>{{r.created_at}}</td></tr>
+{% else %}<tr><td colspan="4">No reviews yet.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

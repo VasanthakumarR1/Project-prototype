@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Vidya Connect{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#751747;--paper:#fff2f8;--card:#fffafd;--line:#f0c9dc;--pink:#ed78ad;--green:#287954;--mut:#775b69}
+*{box-sizing:border-box}body{margin:0;font:16px/1.5 Figtree,system-ui,sans-serif;background:var(--paper);color:#382431}
+header{background:var(--ink);color:#fff;padding:14px 5vw;display:flex;justify-content:space-between;align-items:center}
+header b{font-size:20px;letter-spacing:.2px}header a{color:#fff;opacity:.8;text-decoration:none}
+main{max-width:1050px;margin:24px auto;padding:0 5vw}
+h1{font-size:28px;margin:0 0 4px;color:var(--ink)}h2{font-size:19px;margin:0 0 12px;color:var(--ink)}
+.sub{color:var(--mut);margin:0 0 20px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:18px;box-shadow:0 5px 18px #7517470a}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #dcb2c7;border-radius:7px;font:inherit;margin:4px 0 10px;background:#fff}
+button,.btn{background:var(--ink);color:#fff;border:0;border-radius:7px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
+button.amber{background:var(--pink);color:#4e1532}
+:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:600;font-size:14px}td a{color:var(--ink);font-weight:600;text-decoration:none}
+.table-wrap{width:100%;overflow-x:auto}
+.record-table input,.record-table select{min-width:90px;margin:0}
+.record-table .actions{white-space:nowrap}
+.flash{background:#fde3ef;border:1px solid #efb5d0;color:#751747;padding:10px 14px;border-radius:7px;margin-bottom:16px}
+.tag{font-size:13px;background:#fce0ec;color:var(--ink);padding:2px 8px;border-radius:99px}
+.good{color:var(--green);font-weight:700}.msg{border-left:3px solid var(--pink);padding:4px 12px;margin:10px 0}
+@media(max-width:600px){h1{font-size:23px}table{font-size:14px}}
+</style></head><body>
+<header><b>Vidya Connect</b>{% if session.role %}<a href="/logout">Log out</a>{% endif %}</header>
+<main>{% for m in get_flashed_messages() %}<div class="flash">{{m}}</div>{% endfor %}
+{% block body %}{% endblock %}</main></body></html>

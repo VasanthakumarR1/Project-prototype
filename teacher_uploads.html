@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% block title %}Upload class records{% endblock %}{% block body %}
+<p><a href="/teacher">← Back to class</a></p>
+<h1>Upload class records</h1>
+<p class="sub">Upload a CSV for monthly attendance or exam ranks. Enter subject marks on each student's rank card.</p>
+<form class="box" method="post" action="/teacher/bulk" enctype="multipart/form-data">
+<label>Record type<select name="kind" id="bulk-kind"><option value="attendance">Monthly attendance %</option><option value="rank">Exam rank</option></select></label>
+<div id="attendance-period"><label>Month<input name="month" type="month" required></label></div>
+<div id="exam-period" hidden><label>Exam<select name="exam" disabled required>{% for e in exams %}<option>{{e}}</option>{% endfor %}</select></label></div>
+<p class="sub">CSV columns: <b>roll_no,value</b>.</p>
+<label>CSV file<input type="file" name="file" accept=".csv,text/csv" required></label>
+<button>Upload records</button>
+</form>
+<script>
+const bulkKind = document.getElementById("bulk-kind");
+const attendancePeriod = document.getElementById("attendance-period");
+const examPeriod = document.getElementById("exam-period");
+function updateBulkPeriod() {
+  const attendance = bulkKind.value === "attendance";
+  attendancePeriod.hidden = !attendance;
+  attendancePeriod.querySelector("input").disabled = !attendance;
+  examPeriod.hidden = attendance;
+  examPeriod.querySelector("select").disabled = attendance;
+}
+bulkKind.addEventListener("change", updateBulkPeriod);
+updateBulkPeriod();
+</script>
+{% endblock %}

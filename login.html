@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block body %}
+<h1>Welcome to your school</h1><p class="sub">Teachers manage the class. Parents follow their child's progress.</p>
+<div class="grid">
+<form class="box" method="post" action="/login/teacher"><h2>Teacher login</h2>
+<label>Username<input name="username" required></label>
+<label>Password<input type="password" name="password" required></label>
+<button>Log in</button></form>
+<form class="box" method="post" action="/login/parent"><h2>Parent login</h2>
+<label>Student ID<input name="code" placeholder="e.g. S1001" required></label>
+<label>Registered mobile number<input name="phone" inputmode="numeric" required></label>
+<button class="amber">View my child's progress</button></form>
+<form class="box" method="post" action="/login/admin"><h2>Principal login</h2>
+<label>Username<input name="username" required></label>
+<label>Password<input type="password" name="password" required></label>
+<button>Log in</button></form>
+</div>{% endblock %}

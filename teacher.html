@@ -1,0 +1,55 @@
+{% extends "base.html" %}{% block title %}Class {{t.standard}} {{t.section}}{% endblock %}{% block body %}
+<h1>Class {{t.standard}}-{{t.section}} <span class="tag">{{t.year}}</span></h1>
+<p class="sub">{{t.name}} · {{t.subject or "Class teacher"}} · {{students|length}} students</p>
+<p><a class="btn" href="/teacher/uploads">Upload records</a></p>
+<form class="box" method="post" action="/teacher/exams"><h2>Configure an exam</h2>
+<label>Exam name<input name="name" placeholder="Half-yearly" required></label>
+<label>Subjects<textarea name="subjects" rows="3" required placeholder="Mathematics, Science, English"></textarea></label>
+<button>Add exam</button><p class="sub">Each subject gets a marks field in every student's rank card. To add subjects to an existing exam that has none, enter its exact name.</p>
+<h3>Configured exams</h3><div class="table-wrap"><table><thead><tr><th>Exam</th><th>Subjects</th></tr></thead><tbody>
+{% for exam in exams %}<tr><td>{{exam}}</td><td>{{exam_subjects[exam]|join(", ") if exam_subjects[exam] else "No subjects yet"}}</td></tr>
+{% else %}<tr><td colspan="2">No exams configured yet.</td></tr>{% endfor %}
+</tbody></table></div></form>
+<div class="grid">
+<form class="box" method="post" action="/teacher/announce"><h2>Class inbox · message all parents</h2>
+<textarea name="body" rows="3" required placeholder="Tomorrow is a PTA meeting."></textarea>
+<button class="amber">Send to all parents</button></form>
+<form class="box" method="post" action="/teacher/assignment"><h2>New assignment</h2>
+<input name="title" placeholder="Title" required><textarea name="details" rows="2" placeholder="Details"></textarea>
+<input type="date" name="due" required><button>Post assignment</button></form>
+</div>
+<form class="box" method="get" action="/teacher"><h2>Filter and sort students</h2>
+<div class="grid">
+<label>Blood group<select name="blood_group"><option value="">Any</option>{% for b in ["A+","A-","B+","B-","AB+","AB-","O+","O-"] %}<option value="{{b}}" {% if filters.blood_group==b %}selected{% endif %}>{{b}}</option>{% endfor %}</select></label>
+<label>Minimum age<input type="number" min="0" name="age_min" value="{{filters.age_min}}"></label>
+<label>Maximum age<input type="number" min="0" name="age_max" value="{{filters.age_max}}"></label>
+<label>Overall attendance at least %<input type="number" min="0" max="100" name="attendance_min" value="{{filters.attendance_min}}"></label>
+<label>Overall attendance at most %<input type="number" min="0" max="100" name="attendance_max" value="{{filters.attendance_max}}"></label>
+<label>Attendance month<input type="month" name="attendance_month" value="{{filters.attendance_month}}"></label>
+<label>Rank<input type="number" min="1" name="rank" value="{{filters.rank}}" placeholder="Exact rank"></label>
+<label>Sort by<select name="sort"><option value="roll" {% if filters.sort=="roll" %}selected{% endif %}>Roll number</option><option value="name" {% if filters.sort=="name" %}selected{% endif %}>Alphabetical</option><option value="recent" {% if filters.sort=="recent" %}selected{% endif %}>Recently added</option></select></label>
+</div><button>Apply filters</button> <a class="btn" href="/teacher">Clear</a></form>
+<div class="box"><h2>Students <span class="tag">{{students|length}}</span></h2>
+<div class="table-wrap"><table><thead><tr><th>Roll</th><th>Name</th><th>Student ID</th><th>Age</th><th>Blood group</th><th>Parent number</th><th>Overall attendance</th></tr></thead><tbody>
+{% for s in students %}<tr><td>{{s.roll_no}}</td><td><a href="/teacher/student/{{s.id}}">{{s.name}}</a></td><td>{{s.code}}</td><td>{{s.age or "—"}}</td><td>{{s.blood_group or "—"}}</td><td>{{s.parent_phone}}</td><td>{{s.overall_attendance|round(1) ~ "%" if s.overall_attendance is not none else "—"}}</td></tr>
+{% else %}<tr><td colspan="7">No students match these filters.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="grid">
+<form class="box" method="post" action="/teacher/students"><h2>Add student</h2>
+<label>Name<input name="name" required></label><label>Roll number<input name="roll_no" type="number" min="1" required></label>
+<label>Age<input name="age" type="number" min="0"></label><label>Date of birth<input name="date_of_birth" type="date"></label>
+<label>Blood group<select name="blood_group"><option value="">Select</option>{% for b in ["A+","A-","B+","B-","AB+","AB-","O+","O-"] %}<option>{{b}}</option>{% endfor %}</select></label>
+<label>Gender<input name="gender"></label><label>Parent name<input name="parent_name"></label>
+<label>Parent contact<input name="parent_phone" required></label><label>Address<textarea name="address" rows="2"></textarea></label><button>Save student</button></form>
+<form class="box" method="post" action="/teacher/students" enctype="multipart/form-data"><h2>Import class list (CSV)</h2>
+<p class="sub">Required columns: <code>name,roll_no,parent_phone</code>. Optional: <code>age,date_of_birth,blood_group,gender,parent_name,address</code>.</p>
+<input type="file" name="file" accept=".csv,text/csv" required><button>Upload CSV</button></form>
+</div>
+<div class="box"><h2>Parent reviews</h2><div class="table-wrap"><table><thead><tr><th>Student</th><th>Roll</th><th>Review</th><th>Date</th></tr></thead><tbody>
+{% for r in reviews %}<tr><td>{{r.student_name}}</td><td>{{r.roll_no}}</td><td>{{r.body}}</td><td>{{r.created_at}}</td></tr>
+{% else %}<tr><td colspan="4">No reviews yet.</td></tr>{% endfor %}
+</tbody></table></div></div>
+<div class="box"><h2>Class assignments</h2><div class="table-wrap"><table><thead><tr><th>Assignment</th><th>Details</th><th>Due date</th></tr></thead><tbody>
+{% for a in assignments %}<tr><td>{{a.title}}</td><td>{{a.details}}</td><td>{{a.due}}</td></tr>
+{% else %}<tr><td colspan="3">Nothing posted yet.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

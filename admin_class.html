@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% block title %}Class {{cls.standard}} {{cls.section}}{% endblock %}{% block body %}
+<p><a href="/admin">← Principal dashboard</a></p>
+<h1>Class {{cls.standard}} {{cls.section}} <span class="tag">{{cls.year}}</span></h1>
+<p class="sub">Manage the class teacher login, subject teachers, and student records.</p>
+<div class="grid">
+<div class="box"><h2>Class teacher login</h2>
+{% for t in teachers %}<form method="post" action="/admin/teacher/{{t.id}}/edit">
+<div class="table-wrap"><table class="record-table"><thead><tr><th>Name</th><th>Username</th><th>Subject</th><th>New password (optional)</th><th>Action</th></tr></thead>
+<tbody><tr><td><input aria-label="Teacher name" name="name" value="{{t.name}}" required></td>
+<td><input aria-label="Username" name="username" value="{{t.username}}" required></td>
+<td><input aria-label="Subject" name="subject" value="{{t.subject or ''}}"></td>
+<td><input aria-label="New password" name="password" type="password" minlength="8" placeholder="Leave blank to keep"></td>
+<td><button>Save</button></td></tr></tbody></table></div></form>
+{% else %}<p class="sub">No teachers assigned.</p>{% endfor %}</div>
+<div class="box"><h2>Teachers teaching this class</h2>
+<div class="table-wrap"><table><thead><tr><th>Teacher name</th><th>Subject</th><th>Action</th></tr></thead><tbody>
+{% for teacher in subject_teachers %}<tr><td>{{teacher.name}}</td><td>{{teacher.subject}}</td><td>
+<form method="post" action="/admin/class/{{cls.id}}/subject-teacher/{{teacher.id}}/delete">
+<button class="amber">Remove</button></form></td></tr>
+{% else %}<tr><td colspan="3">No subject teachers added yet.</td></tr>{% endfor %}
+</tbody></table></div>
+<form method="post" action="/admin/class/{{cls.id}}/subject-teachers">
+<label>Teacher name<input name="name" required></label><label>Subject<input name="subject" required></label>
+<button>Add teacher</button></form>
+</div>
+</div>
+<div class="box"><h2>2. Students <span class="tag">{{students|length}}</span></h2>
+<div class="table-wrap"><table><thead><tr><th>Roll</th><th>Name</th><th>Student ID</th><th>Class teacher</th><th>Age</th><th>Blood group</th><th>Parent contact</th></tr></thead><tbody>
+{% for s in students %}<tr><td>{{s.roll_no}}</td><td><a href="/admin/student/{{s.id}}">{{s.name}}</a></td><td>{{s.code}}</td><td>{{s.teacher_name or "—"}}</td><td>{{s.age or "—"}}</td><td>{{s.blood_group or "—"}}</td><td>{{s.parent_phone}}</td></tr>
+{% else %}<tr><td colspan="7">No students in this class yet.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="box"><h2>Remove class</h2><p class="sub">This permanently removes the class, teacher records, students, and their records.</p>
+<form method="post" action="/admin/class/{{cls.id}}/delete" onsubmit="return confirm('Delete this class and all associated records?')"><button class="amber">Delete class</button></form></div>
+{% endblock %}

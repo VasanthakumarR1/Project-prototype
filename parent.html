@@ -1,0 +1,35 @@
+{% extends "base.html" %}{% block title %}{{s.name}}{% endblock %}{% block body %}
+<h1>{{s.name}}</h1><p class="sub">Class {{s.standard}}-{{s.section}} · Roll {{s.roll_no}} · Teacher: {{s.teacher}}</p>
+<div class="box"><h2>Student details</h2><div class="table-wrap"><table><tbody>
+<tr><th>Student ID</th><td>{{s.code}}</td><th>Age</th><td>{{s.age or "—"}}</td></tr>
+<tr><th>Date of birth</th><td>{{s.date_of_birth or "—"}}</td><th>Blood group</th><td>{{s.blood_group or "—"}}</td></tr>
+<tr><th>Parent</th><td>{{s.parent_name or "—"}}</td><th>Contact</th><td>{{s.parent_phone}}</td></tr>
+<tr><th>Address</th><td colspan="3">{{s.address or "—"}}</td></tr>
+</tbody></table></div></div>
+<div class="grid">
+{% for e in exams %}{% set subjects = exam_subjects.get(e, []) %}{% if subjects %}
+<div class="box"><h2>{{e}} {% if ranks.get(e) %}<span class="tag">Rank {{ranks[e]}}</span>{% endif %}</h2>
+<div class="table-wrap"><table><thead><tr><th>Subject</th><th>Marks</th></tr></thead><tbody>
+{% for p in subjects %}{% set m = marks_by_subject.get((e, p.paper)) %}
+<tr><td>{{p.paper}}</td><td>{% if m %}{{m.score|round(1)}} / {{m.max_score|round(1)}}{% else %}Not entered{% endif %}</td></tr>
+{% endfor %}</tbody></table></div>
+</div>
+{% endif %}{% else %}<p class="sub">No exams configured for this class.</p>{% endfor %}
+</div>
+<div class="box"><h2>Attendance</h2><p><b>Overall attendance:</b> {% if overall_attendance is not none %}<span class="good">{{overall_attendance|round(1)}}%</span>{% else %}Not recorded yet{% endif %}</p><div class="table-wrap"><table><thead><tr><th>Month</th><th>Present</th></tr></thead><tbody>
+{% for a in att %}<tr><td>{{a.month}}</td><td class="{{'good' if a.percent>=75}}">{{a.percent|round(1)}}%</td></tr>{% else %}<tr><td colspan="2">Not uploaded yet.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="grid">
+<div class="box"><h2>Assignments</h2><div class="table-wrap"><table><thead><tr><th>Assignment</th><th>Details</th><th>Due date</th></tr></thead><tbody>
+{% for a in assignments %}<tr><td>{{a.title}}</td><td>{{a.details}}</td><td>{{a.due}}</td></tr>{% else %}<tr><td colspan="3">No assignments.</td></tr>{% endfor %}
+</tbody></table></div></div>
+<div class="box"><h2>Messages from school</h2><div class="table-wrap"><table><thead><tr><th>Type</th><th>Message</th><th>Date</th></tr></thead><tbody>
+{% for m in msgs %}<tr><td>{{m.kind}}</td><td>{{m.body}}</td><td>{{m.sent_at.strftime('%d %b, %I:%M %p')}}</td></tr>{% else %}<tr><td colspan="3">No messages.</td></tr>{% endfor %}
+</tbody></table></div></div>
+</div><div class="grid">
+<form class="box" method="post" action="/parent/review"><h2>Send a review to the class teacher</h2>
+<label>Your message<textarea name="body" rows="4" required placeholder="Share feedback or a question with the teacher."></textarea></label>
+<button>Send review</button></form></div>
+<div class="box"><h2>Your reviews</h2><div class="table-wrap"><table><thead><tr><th>Review</th><th>Date</th></tr></thead><tbody>
+{% for r in reviews %}<tr><td>{{r.body}}</td><td>{{r.created_at}}</td></tr>{% else %}<tr><td colspan="2">No reviews sent yet.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

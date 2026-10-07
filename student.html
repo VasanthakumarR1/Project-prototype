@@ -1,0 +1,63 @@
+{% extends "base.html" %}{% block title %}{{s.name}}{% endblock %}{% block body %}
+<p><a href="/teacher">← Back to class</a></p>
+<h1>{{s.name}}</h1><p class="sub">Roll {{s.roll_no}} · ID {{s.code}}</p>
+
+<div class="box">
+<h2>Exam rank cards</h2>
+{% for e in exams %}{% set subjects = exam_subjects.get(e, []) %}{% if subjects %}
+<form method="post" action="{{url_for('save_exam_card', sid=s.id, exam=e)}}">
+<h3>{{e}}{% if ranks.get(e) %} <span class="tag">Rank {{ranks[e]}}</span>{% endif %}</h3>
+<div class="table-wrap"><table class="record-table">
+<thead><tr><th>Subject</th><th>Marks</th><th>Out of</th></tr></thead><tbody>
+{% for p in subjects %}
+{% set m = marks_by_subject.get((e, p.paper)) %}
+<tr>
+<td>{{p.paper}}</td>
+<td><input aria-label="{{p.paper}} marks" name="score_{{p.paper}}" type="number" min="0" step="0.5" value="{{m.score if m else ''}}" placeholder="Enter marks"></td>
+<td><input aria-label="{{p.paper}} maximum marks" name="max_score_{{p.paper}}" type="number" min="1" step="0.5" value="{{m.max_score if m else 100}}"></td>
+</tr>
+{% endfor %}
+</tbody></table></div>
+<label>Class rank<input name="rank" type="number" min="1" value="{{ranks.get(e, '')}}" placeholder="Optional"></label>
+<button>Save rank card</button>
+</form><hr>
+{% endif %}{% else %}<p class="sub">No exams configured for this class.</p>{% endfor %}
+</div>
+
+<div class="grid">
+<form class="box" method="post" action="/teacher/student/{{s.id}}/record"><h2>Monthly attendance</h2>
+<input type="hidden" name="kind" value="attendance"><label>Month<input name="period" type="month" required></label>
+<label>Attendance %<input name="value" type="number" min="0" max="100" step="0.1" required></label><button>Save attendance</button>
+<p><b>Overall attendance:</b> {% if overall_attendance is not none %}{{overall_attendance|round(1)}}%{% else %}Not recorded yet{% endif %}</p>
+<div class="table-wrap"><table><thead><tr><th>Month</th><th>Attendance</th></tr></thead><tbody>
+{% for a in att %}<tr><td>{{a.month}}</td><td>{{a.percent|round(1)}}%</td></tr>{% else %}<tr><td colspan="2">No monthly attendance recorded.</td></tr>{% endfor %}
+</tbody></table></div></form>
+
+<form class="box" method="post" action="/teacher/student/{{s.id}}/edit"><h2>Student profile</h2>
+<div class="table-wrap"><table class="record-table"><tbody>
+<tr><th><label for="teacher-student-name">Name</label></th><td><input id="teacher-student-name" name="name" value="{{s.name}}" required></td></tr>
+<tr><th><label for="teacher-student-roll">Roll number</label></th><td><input id="teacher-student-roll" name="roll_no" type="number" min="1" value="{{s.roll_no}}" required></td></tr>
+<tr><th><label for="teacher-student-age">Age</label></th><td><input id="teacher-student-age" name="age" type="number" min="0" value="{{s.age or ''}}"></td></tr>
+<tr><th><label for="teacher-student-dob">Date of birth</label></th><td><input id="teacher-student-dob" name="date_of_birth" type="date" value="{{s.date_of_birth or ''}}"></td></tr>
+<tr><th><label for="teacher-student-blood">Blood group</label></th><td><select id="teacher-student-blood" name="blood_group"><option value="">Select</option>{% for b in ["A+","A-","B+","B-","AB+","AB-","O+","O-"] %}<option value="{{b}}" {% if s.blood_group==b %}selected{% endif %}>{{b}}</option>{% endfor %}</select></td></tr>
+<tr><th><label for="teacher-student-gender">Gender</label></th><td><input id="teacher-student-gender" name="gender" value="{{s.gender or ''}}"></td></tr>
+<tr><th><label for="teacher-parent-name">Parent name</label></th><td><input id="teacher-parent-name" name="parent_name" value="{{s.parent_name or ''}}"></td></tr>
+<tr><th><label for="teacher-parent-phone">Parent contact</label></th><td><input id="teacher-parent-phone" name="parent_phone" value="{{s.parent_phone}}" required></td></tr>
+<tr><th><label for="teacher-student-address">Address</label></th><td><textarea id="teacher-student-address" name="address" rows="2">{{s.address or ''}}</textarea></td></tr>
+</tbody></table></div>
+<button>Save profile</button></form>
+</div>
+
+<details class="box"><summary>Messages, parent reviews, and student actions</summary>
+<form method="post" action="/teacher/student/{{s.id}}/message"><h3>Message parent</h3>
+<textarea name="body" rows="3" required placeholder="Write a message for this student's parent."></textarea><button class="amber">Send message</button></form>
+<h3>Parent reviews</h3><div class="table-wrap"><table><thead><tr><th>Review</th><th>Date</th></tr></thead><tbody>
+{% for r in reviews %}<tr><td>{{r.body}}</td><td>{{r.created_at}}</td></tr>{% else %}<tr><td colspan="2">No review submitted.</td></tr>{% endfor %}
+</tbody></table></div>
+<h3>Student removal</h3><p class="sub">The principal must approve student removal.</p>
+{% if delete_pending %}<span class="tag">Approval pending</span>{% else %}<form method="post" action="/teacher/student/{{s.id}}/delete-request"><button class="amber">Request student removal</button></form>{% endif %}
+<h3>Messages sent</h3><div class="table-wrap"><table><thead><tr><th>Type</th><th>Message</th><th>Date</th></tr></thead><tbody>
+{% for m in msgs %}<tr><td>{{m.kind}}</td><td>{{m.body}}</td><td>{{m.sent_at}}</td></tr>{% else %}<tr><td colspan="3">None yet.</td></tr>{% endfor %}
+</tbody></table></div>
+</details>
+{% endblock %}
