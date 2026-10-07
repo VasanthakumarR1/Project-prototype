@@ -59,6 +59,21 @@ python app.py
 
 Open <http://127.0.0.1:5000/>.
 
+## Default Login Credentials
+
+### 1. Principal / Admin Login
+- **Username:** `principal`
+- **Password:** `admin123`
+
+### 2. Class Teacher Login
+- **Username:** `teacher1` (or standard-section specific usernames created by admin, e.g., `10aclass`, `8aclass`)
+- **Password:** `teacher123` (or the custom password configured during class creation)
+
+### 3. Parent / Student Login
+- **Student ID:** Student Code (e.g., `S4261001`, `S5268001`)
+- **Parent Phone Number:** Registered 10-digit mobile number (e.g., `7305891731`, `7397684891`)
+*(Note: Parent login uses the Student Code as the ID and the registered Parent Phone Number as the password/verification).*
+
 ### PostgreSQL setup
 
 Create an empty PostgreSQL database, apply [`schema.sql`](schema.sql) to it, set `DATABASE_URL` in `.env`, then run `python seed.py` and `python app.py`. The application applies subsequent schema migrations at startup.
